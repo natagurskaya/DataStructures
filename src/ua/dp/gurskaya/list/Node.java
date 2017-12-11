@@ -1,4 +1,4 @@
-package ua.dp.gurskaya.arrayList;
+package ua.dp.gurskaya.list;
 
 public class Node<E> {
     private E value;

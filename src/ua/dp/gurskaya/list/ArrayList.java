@@ -1,4 +1,4 @@
-package ua.dp.gurskaya.arrayList;
+package ua.dp.gurskaya.list;
 
 import java.util.Arrays;
 
@@ -33,7 +33,7 @@ public class ArrayList<E> implements List<E> {
 
     public void remove(E object) {
         if (isEmpty()) {
-            System.out.println("arrayList is empty, could not remove an object");
+            System.out.println("list is empty, could not remove an object");
         }else {
             for (int i = 0; i < size; i++) {
                 if (object.equals(array[i])) {
@@ -45,7 +45,7 @@ public class ArrayList<E> implements List<E> {
 
     public void remove(int index) {
         if (isEmpty()) {
-            System.out.println("arrayList is empty, could not remove an object");
+            System.out.println("list is empty, could not remove an object");
         }else {
             validateIndex(index);
             System.arraycopy(array, index + 1, array, index, size - 1 - index);
@@ -63,7 +63,7 @@ public class ArrayList<E> implements List<E> {
 
     public E get(int index) {
         if (isEmpty()) {
-            throw new RuntimeException("arrayList is empty, could not get an object");
+            throw new RuntimeException("list is empty, could not get an object");
         }else {
             validateIndex(index);
             return array[index];

@@ -1,4 +1,4 @@
-package ua.dp.gurskaya.arrayList;
+package ua.dp.gurskaya.list;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
