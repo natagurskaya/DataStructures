@@ -1,20 +1,17 @@
 package ua.dp.gurskaya.datastuctures.map;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Set;
+import java.util.*;
 
-public class Hashmap<K, V> implements Map<K, V> {
+public class HashMap<K, V> implements Map<K, V> {
 
     private Node[] table;
     private int size;
 
-    public Hashmap() {
+    public HashMap() {
         table = new Node[16];
     }
 
-    public Hashmap(int capacity) {
+    public HashMap(int capacity) {
         table = new Node[capacity];
     }
 
@@ -30,19 +27,23 @@ public class Hashmap<K, V> implements Map<K, V> {
 
     @Override
     public boolean containsKey(Object key) {
-        for (Node<K, V> node = table[0]; node != null; node = node.getNext()) {
+        int index = findIndex(key, table.length);
+        for (Node<K, V> node = table[index]; node != null; node = node.getNext()) {
             if (node.getKey().equals(key)) {
                 return true;
             }
         }
+
         return false;
     }
 
     @Override
     public boolean containsValue(Object value) {
-        for (Node<K, V> node = table[0]; node != null; node = node.getNext()) {
-            if (node.getValue().equals(value)) {
-                return true;
+        for (Node aTable : table) {
+            for (Node<K, V> node = aTable; node != null; node = node.getNext()) {
+                if (node.getValue().equals(value)) {
+                    return true;
+                }
             }
         }
         return false;
@@ -51,7 +52,7 @@ public class Hashmap<K, V> implements Map<K, V> {
     @Override
     public V get(Object key) {
         V value = null;
-        if (key.equals(null)) {
+        if (key == null) {
             if (containsKeyInBucket(key, 0)) {
                 value = getFromNullKey();
             }
@@ -67,7 +68,7 @@ public class Hashmap<K, V> implements Map<K, V> {
 
     @Override
     public V put(K key, V value) {
-        if (key.equals(null)) {
+        if (key == null) {
             putForNullKey(value);
         } else {
             int index = findIndex(key, table.length);
@@ -77,6 +78,7 @@ public class Hashmap<K, V> implements Map<K, V> {
             } else if (containsKeyInBucket(key, index)) {
                 Node<K, V> temp = getByKeyInBucket(key, index);
                 temp.setValue(value);
+                size--;
             } else {
                 Node<K, V> temp = table[index];
                 while (temp.getNext() != null) {
@@ -106,17 +108,37 @@ public class Hashmap<K, V> implements Map<K, V> {
 
     @Override
     public Set<K> keySet() {
-        return null;
+
+        Set<K> set = new HashSet<>();
+        for (Node aTable : table) {
+            for (Node<K, V> temp = aTable; temp != null; temp = temp.getNext()) {
+                set.add(temp.getKey());
+            }
+        }
+        return set;
     }
 
     @Override
     public Collection<V> values() {
-        return null;
+        Collection<V> collection = new HashSet<>();
+        for (Node aTable : table) {
+            for (Node<K, V> temp = aTable; temp != null; temp = temp.getNext()) {
+                collection.add(temp.getValue());
+            }
+        }
+        return collection;
     }
 
     @Override
     public Set<Entry<K, V>> entrySet() {
-        return null;
+
+        Set<Entry<K, V>> set = new HashSet<>();
+        for (Node aTable : table) {
+            for (Node<K, V> temp = aTable; temp != null; temp = temp.getNext()) {
+                set.add((Entry<K, V>) temp);
+            }
+        }
+        return set;
     }
 
     private int findIndex(Object key, int capacity) {
@@ -132,12 +154,13 @@ public class Hashmap<K, V> implements Map<K, V> {
         } else {
             newNode = getByKeyInBucket(null, 0);
             newNode.setValue(value);
+            size--;
         }
     }
 
     private Node<K, V> getByKeyInBucket(Object key, int index) {
         for (Node<K, V> node = table[index]; node != null; node = node.getNext()) {
-            if (node.getKey().equals(key)) {
+            if (node.getKey() == key) {
                 return node;
             }
         }
@@ -146,21 +169,38 @@ public class Hashmap<K, V> implements Map<K, V> {
 
     private V getFromNullKey() {
         for (Node<K, V> node = table[0]; node != null; node = node.getNext()) {
-            if (node.getKey().equals(null)) {
+            if (node.getKey() == null) {
                 return node.getValue();
             }
         }
         throw new NoSuchElementException("No element found");
     }
 
-
     private boolean containsKeyInBucket(Object key, int index) {
         for (Node<K, V> node = table[index]; node != null; node = node.getNext()) {
-            if (node.getKey().equals(key)) {
+            if (node.getKey()==key) {
                 return true;
             }
         }
         return false;
     }
 
+    private Set<Node<K, V>> getNodeSet() {
+        Set<Node<K, V>> set = new HashSet<>();
+        for (Node aTable : table) {
+            for (Node<K, V> temp = aTable; temp != null; temp = temp.getNext()) {
+                set.add(temp);
+            }
+        }
+        return set;
+    }
+
+    @Override
+    public String toString() {
+        return "HashMap{" +
+                "table=" + Arrays.toString(table) +
+                ", size=" + size +
+                '}';
+    }
 }
+
