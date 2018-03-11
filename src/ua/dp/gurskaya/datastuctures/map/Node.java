@@ -1,11 +1,13 @@
 package ua.dp.gurskaya.datastuctures.map;
 
-public class Node<K,V> {
+import java.util.Map;
+
+public class Node<K,V>  implements Map.Entry<K,V> {
     private K key;
     private V value;
     private Node<K,V> next;
 
-    public Node(K key, V value) {
+    public Node(K key, V value){
         this.key = key;
         this.value = value;
     }
@@ -22,8 +24,8 @@ public class Node<K,V> {
         return value;
     }
 
-    public void setValue(V value) {
-        this.value = value;
+    public V setValue(V value) {
+        return this.value = value;
     }
 
     public Node<K, V> getNext() {
