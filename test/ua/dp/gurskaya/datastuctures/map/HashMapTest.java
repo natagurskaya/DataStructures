@@ -4,10 +4,11 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.Set;
 
 public class HashMapTest {
-    private HashMap<String, String> hashMap = new HashMap<>();
+    private Map<String, String> hashMap = new HashMap<>();
 
     @Test
     public void testSize() {
@@ -26,9 +27,7 @@ public class HashMapTest {
 
         hashMap.put("key", "Java");
         hashMap.put(null, "Java");
-
         hashMap.clear();
-
         assertTrue(hashMap.isEmpty());
     }
 
@@ -101,7 +100,7 @@ public class HashMapTest {
         //when
         hashMap.putAll(newMap);
         //then
-        //  assertEquals(5, hashMap.size());
+        assertEquals(5, hashMap.size());
         assertEquals(true, hashMap.containsValue("Deniska"));
         assertEquals("new Value", hashMap.get(null));
         assertEquals("Jack Daniels", hashMap.get("Stas"));
@@ -157,5 +156,21 @@ public class HashMapTest {
         Set set = hashMap.entrySet();
         //then
         assertEquals(4, set.size());
+    }
+
+    @Test
+    public void testResize(){
+        Map<String, String> map = new HashMap<>(1);
+        map.put("Mamba", "Java");
+        map.put(null, "King");
+        map.put(null, "Nata");
+        map.put("gh", "Java");
+        map.put("gh", "Core");
+        map.put("lol", null);
+
+        assertEquals(4, map.size());
+        assertTrue(map.containsValue("Nata"));
+        assertTrue(map.containsValue("Core"));
+        assertTrue(map.containsValue(null));
     }
 }

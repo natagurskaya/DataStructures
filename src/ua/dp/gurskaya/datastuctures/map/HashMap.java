@@ -29,7 +29,6 @@ public class HashMap<K, V> implements Map<K, V> {
 
     @Override
     public boolean containsKey(Object key) {
-        int index;
         if (key == null) {
             for (Node node = table[0]; node != null; node = node.getNext()) {
                 if (null == node.getKey()) {
@@ -37,7 +36,7 @@ public class HashMap<K, V> implements Map<K, V> {
                 }
             }
         } else {
-            index = findIndex(key, table.length);
+            int index = findIndex(key, table.length);
             for (Node node = table[index]; node != null; node = node.getNext()) {
                 if (key.equals(node.getKey())) {
                     return true;
@@ -76,7 +75,11 @@ public class HashMap<K, V> implements Map<K, V> {
     @Override
     public V get(Object key) {
         if (key == null) {
-            return getFromNullKey();
+            for (Node<K, V> node = table[0]; node != null; node = node.getNext()) {
+                if (node.getKey() == null) {
+                    return node.getValue();
+                }
+            }
         } else {
             int index = findIndex(key, table.length);
             Node<K, V> node = table[index];
@@ -98,20 +101,20 @@ public class HashMap<K, V> implements Map<K, V> {
             return putForNullKey(value);
         } else {
             int index = findIndex(key, table.length);
-            Node<K, V> newNode = new Node<>(key, value);
+            Node<K, V> newNode = new Node<>();
+            newNode.setKey(key);
+            newNode.setValue(value);
             if (table[index] == null) {
                 table[index] = newNode;
             } else {
-                Node<K, V> node;
-                for (node = table[index]; node != null; node = node.getNext()) {
+                for (Node<K, V> node = table[index]; node != null; node = node.getNext()) {
                     if (key.equals(node.getKey())) {
                         V oldValue = node.getValue();
                         node.setValue(value);
                         return oldValue;
                     } else if (node.getNext() == null) {
                         node.setNext(newNode);
-                        size++;
-                        return null;
+                        break;
                     }
                 }
             }
@@ -124,33 +127,34 @@ public class HashMap<K, V> implements Map<K, V> {
     public V remove(Object key) {
         int index;
         if (key == null) {
-            index = 0;
+            return removeForNullKey();
         } else {
-            index = findIndex(key, table.length);
+            index = findIndex(key);
         }
-        V oldValue;
         Node<K, V> current = table[index];
-        Node<K, V> previous = null;
-        while (current.getKey()!=key) {
-            previous = current;
+        Node<K, V> prev = null;
+        V result;
+        while (current != null) {
+            if (key.equals(current.getKey())) {
+                result = current.getValue();
+                if (prev == null) {
+                    table[index] = current.getNext();
+                } else {
+                    if (current.getNext() != null) {
+                        prev.setNext(current.getNext());
+                    } else {
+                        prev.setNext(null);
+                    }
+                }
+                current = null;
+                size--;
+                return result;
+            }
+            prev = current;
             current = current.getNext();
         }
-        if (previous == null) {
-            oldValue = current.getValue();
-            current = null;
-            return oldValue;
-        } else if (current.getNext() == null) {
-            oldValue = current.getValue();
-            previous.setNext(null);
-            return oldValue;
-        } else if (current.getNext()!= null){
-            oldValue = current.getValue();
-            previous.setNext(current.getNext());
-            return oldValue;
-        } else {
-            return null;
-        }
-     }
+        return null;
+    }
 
     @Override
     public void putAll(Map<? extends K, ? extends V> map) {
@@ -180,7 +184,7 @@ public class HashMap<K, V> implements Map<K, V> {
 
     @Override
     public Collection<V> values() {
-        Collection<V> collection = new HashSet<>();
+        Collection<V> collection = new ArrayList<>();
         for (Node<K, V> aTable : table) {
             for (Node<K, V> temp = aTable; temp != null; temp = temp.getNext()) {
                 collection.add(temp.getValue());
@@ -201,26 +205,29 @@ public class HashMap<K, V> implements Map<K, V> {
 
     }
 
+    private int findIndex(Object key) {
+        return findIndex(key, table.length);
+    }
+
     private int findIndex(Object key, int capacity) {
-        int keyHashCode = key.hashCode();
+        int keyHashCode = Math.abs(key.hashCode());
         return keyHashCode % capacity;
     }
 
     private V putForNullKey(V value) {
-        Node<K, V> newNode = new Node<>(null, value);
+        Node<K, V> newNode = new Node<>();
+        newNode.setValue(value);
         if (table[0] == null) {
             table[0] = newNode;
         } else {
-            Node<K, V> node;
-            for (node = table[0]; node != null; node = node.getNext()) {
+            for (Node<K, V> node = table[0]; node != null; node = node.getNext()) {
                 if (null == node.getKey()) {
                     V oldValue = node.getValue();
                     node.setValue(value);
                     return oldValue;
                 } else if (node.getNext() == null) {
                     node.setNext(newNode);
-                    size++;
-                    return null;
+                    break;
                 }
             }
         }
@@ -228,11 +235,28 @@ public class HashMap<K, V> implements Map<K, V> {
         return null;
     }
 
-    private V getFromNullKey() {
-        for (Node<K, V> node = table[0]; node != null; node = node.getNext()) {
-            if (node.getKey() == null) {
-                return node.getValue();
+    private V removeForNullKey() {
+        Node<K, V> current = table[0];
+        Node<K, V> prev = null;
+        V result;
+        while (current != null) {
+            if (null == current.getKey()) {
+                result = current.getValue();
+                if (prev == null) {
+                    table[0] = current.getNext();
+                } else {
+                    if (current.getNext() != null) {
+                        prev.setNext(current.getNext());
+                    } else {
+                        prev.setNext(null);
+                    }
+                }
+                current = null;
+                size--;
+                return result;
             }
+            prev = current;
+            current = current.getNext();
         }
         return null;
     }
@@ -242,42 +266,37 @@ public class HashMap<K, V> implements Map<K, V> {
             Node<K, V>[] newTable = new Node[table.length * 2];
             transfer(newTable);
             table = newTable;
-
         }
     }
 
     private void transfer(Node<K, V>[] newTable) {
-        int newCapacity = newTable.length;
-        int index;
         for (Node<K, V> bucket : table) {
             if (bucket != null) {
                 for (Node<K, V> temp = bucket; temp != null; temp = temp.getNext()) {
-                    if (temp.getKey() == null) {
+                    K key = temp.getKey();
+                    V value = temp.getValue();
+                    Node<K, V> newNode = new Node<>();
+                    newNode.setValue(value);
+                    newNode.setKey(key);
+                    int index;
+                    if (key == null) {
                         index = 0;
                     } else {
-                        index = findIndex(temp.getKey(), newCapacity);
+                        index = findIndex(key, newTable.length);
                     }
                     if (newTable[index] == null) {
-                        newTable[index] = temp;
+                        newTable[index] = newNode;
                     } else {
                         Node<K, V> current = newTable[index];
                         while (current.getNext() != null) {
                             current = current.getNext();
 
                         }
-                        current.setNext(temp);
+                        current.setNext(newNode);
                     }
                 }
             }
         }
-    }
-
-    @Override
-    public String toString() {
-        return "HashMap{" +
-                "table=" + Arrays.toString(table) +
-                ", size=" + size +
-                '}';
     }
 }
 
